@@ -29,7 +29,7 @@ from functools import partial, wraps
 import jwt
 from quart import Response, jsonify, request
 
-from api.apps import current_user, login_required
+from api.apps import current_user, login_required, superadmin_or_teamadmin_required
 from api.apps.services.canvas_replica_service import CanvasReplicaService
 from api.db import CanvasCategory
 from api.db.db_models import Task
@@ -421,6 +421,7 @@ def get_agent_session(agent_id, session_id, tenant_id):
 @manager.route("/agents/<agent_id>/sessions/<session_id>", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 @_require_canvas_access_sync
 def delete_agent_session_item(agent_id, session_id, tenant_id):
     return get_json_result(data=API4ConversationService.delete_by_id(session_id))
@@ -559,6 +560,7 @@ def list_agent_tags(tenant_id):
 @manager.route("/agents/<canvas_id>/tags", methods=["PUT"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update_agent_tags(tenant_id, canvas_id):
     if not UserCanvasService.accessible(canvas_id, tenant_id):
         logging.info(
@@ -600,6 +602,7 @@ async def update_agent_tags(tenant_id, canvas_id):
 @manager.route("/agents", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def create_agent(tenant_id):
     req = {k: v for k, v in (await get_request_json()).items() if v is not None}
     req["user_id"] = tenant_id
@@ -668,6 +671,7 @@ async def create_agent(tenant_id):
 @manager.route("/agents/<agent_id>/upload", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 @_require_canvas_access_async
 async def upload_agent_file(agent_id, tenant_id):
     files = await request.files
@@ -846,6 +850,7 @@ async def get_agent_logs(agent_id, message_id, tenant_id):
 @manager.route("/agents/<agent_id>", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 @_require_canvas_owner_sync
 def delete_agent(agent_id, tenant_id):
     UserCanvasService.delete_by_id(agent_id)
@@ -855,6 +860,7 @@ def delete_agent(agent_id, tenant_id):
 @manager.route("/agents/<agent_id>", methods=["PUT"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 @_require_canvas_access_async
 async def update_agent(agent_id, tenant_id):
     req = {k: v for k, v in (await get_request_json()).items() if v is not None}
@@ -906,6 +912,7 @@ async def update_agent(agent_id, tenant_id):
 @manager.route("/agents/<agent_id>/reset", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 @_require_canvas_access_async
 async def reset_agent(agent_id, tenant_id):
     try:

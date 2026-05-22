@@ -103,8 +103,8 @@ def test_team_dataset_is_accessible_to_joined_tenant_member(monkeypatch):
 
     monkeypatch.setattr(KnowledgebaseService, "get_by_id", classmethod(lambda cls, kb_id: (True, kb)))
     monkeypatch.setattr(
-        "api.db.services.knowledgebase_service.TenantService.get_joined_tenants_by_user_id",
-        lambda _user_id: [{"tenant_id": "owner-1"}],
+        "api.common.check_team_permission.get_user_team_role",
+        lambda _user_id, _tenant_id: "member",
     )
 
     assert _unwrapped_kb_accessible()(KnowledgebaseService, "kb-team", "member-2") is True

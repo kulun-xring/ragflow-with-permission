@@ -229,6 +229,32 @@ def login_required(func: Callable[P, Awaitable[T]]) -> Callable[P, Awaitable[T]]
     return wrapper
 
 
+def superadmin_or_teamadmin_required(func):
+    """Decorator: require TeamAdmin or higher role in the target team.
+
+    Must be applied AFTER @add_tenant_id_to_kwargs (which injects tenant_id).
+    Decorator order (outermost first): @login_required → @add_tenant_id_to_kwargs → @superadmin_or_teamadmin_required
+    """
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        from api.common.check_team_permission import get_user_team_role
+        tenant_id = kwargs.get('tenant_id')
+        if not tenant_id:
+            return get_json_result(code=RetCode.FORBIDDEN, message="Missing tenant_id")
+
+        role = get_user_team_role(current_user.id, tenant_id)
+        if role == 'none':
+            return get_json_result(code=RetCode.FORBIDDEN, message="您不是该团队的成员。")
+        if role == 'member':
+            return get_json_result(
+                code=RetCode.FORBIDDEN,
+                message="操作失败：您在该团队中仅拥有【只读】权限，无法执行涉及修改的操作。"
+            )
+        return await current_app.ensure_async(func)(*args, **kwargs)
+
+    return wrapper
+
+
 def login_user(user, remember=False, duration=None, force=False, fresh=True):
     """
     Logs a user in. You should pass the actual user object to this. If the

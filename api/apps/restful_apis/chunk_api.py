@@ -21,7 +21,7 @@ import xxhash
 from pydantic import BaseModel, Field, validator
 from quart import request
 
-from api.apps import login_required
+from api.apps import login_required, superadmin_or_teamadmin_required
 from api.db.joint_services.tenant_model_service import (
     get_model_config_by_id,
     get_model_config_by_type_and_name,
@@ -215,6 +215,7 @@ async def get_chunk(tenant_id, dataset_id, document_id, chunk_id):
 @manager.route("/datasets/<dataset_id>/documents/<document_id>/chunks", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def add_chunk(tenant_id, dataset_id, document_id):
     from rag.nlp import rag_tokenizer, search
 
@@ -306,6 +307,7 @@ async def add_chunk(tenant_id, dataset_id, document_id):
 @manager.route("/datasets/<dataset_id>/documents/<document_id>/chunks", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def rm_chunk(tenant_id, dataset_id, document_id):
     from rag.nlp import search
 
@@ -355,6 +357,7 @@ async def rm_chunk(tenant_id, dataset_id, document_id):
 @manager.route("/datasets/<dataset_id>/documents/<document_id>/chunks/<chunk_id>", methods=["PATCH"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update_chunk(tenant_id, dataset_id, document_id, chunk_id):
     from rag.app.qa import beAdoc, rmPrefix
     from rag.nlp import rag_tokenizer, search
@@ -444,6 +447,7 @@ async def update_chunk(tenant_id, dataset_id, document_id, chunk_id):
 @manager.route("/datasets/<dataset_id>/documents/<document_id>/chunks", methods=["PATCH"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def switch_chunks(tenant_id, dataset_id, document_id):
     from rag.nlp import search
 

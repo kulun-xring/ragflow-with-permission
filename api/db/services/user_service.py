@@ -214,6 +214,27 @@ class TenantService(CommonService):
 
     @classmethod
     @DB.connection_context()
+    def get_user_teams_with_role(cls, user_id):
+        """Return all teams the user belongs to, with their role (owner/admin/normal).
+        Unlike get_joined_tenants_by_user_id which only returns role=='normal'."""
+        fields = [
+            cls.model.id.alias("tenant_id"),
+            cls.model.name,
+            cls.model.llm_id,
+            cls.model.embd_id,
+            cls.model.asr_id,
+            cls.model.img2txt_id,
+            UserTenant.role]
+        return list(cls.model.select(*fields)
+                    .join(UserTenant, on=(
+                        (cls.model.id == UserTenant.tenant_id) &
+                        (UserTenant.user_id == user_id) &
+                        (UserTenant.status == StatusEnum.VALID.value)
+                    ))
+                    .where(cls.model.status == StatusEnum.VALID.value).dicts())
+
+    @classmethod
+    @DB.connection_context()
     def decrease(cls, user_id, num):
         num = cls.model.update(credit=cls.model.credit - num).where(
             cls.model.id == user_id).execute()

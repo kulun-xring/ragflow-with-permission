@@ -623,6 +623,14 @@ async def set_tenant_info():
     req = await get_request_json()
     try:
         tid = req.pop("tenant_id")
+        from api.common.check_team_permission import get_user_team_role
+        role = get_user_team_role(current_user.id, tid)
+        if role not in ('superadmin', 'teamadmin'):
+            return get_json_result(
+                data=False,
+                message="You don't have permission to modify this tenant's models.",
+                code=RetCode.FORBIDDEN,
+            )
         update_dict = ensure_tenant_model_id_for_params(tid, req)
         TenantService.update_by_id(tid, update_dict)
         return get_json_result(data=True)

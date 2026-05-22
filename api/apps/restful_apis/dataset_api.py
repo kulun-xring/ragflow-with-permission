@@ -18,7 +18,7 @@ import logging
 from peewee import OperationalError
 from quart import request
 from common.constants import RetCode
-from api.apps import login_required, current_user
+from api.apps import login_required, current_user, superadmin_or_teamadmin_required
 from api.utils.api_utils import get_error_argument_result, get_error_data_result, get_json_result, get_result, add_tenant_id_to_kwargs
 from api.utils.validation_utils import (
     CreateDatasetReq,
@@ -80,6 +80,7 @@ def get_flattened_metadata(tenant_id):
 @manager.route("/datasets", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def create(tenant_id: str = None):
     """
     Create a new dataset.
@@ -158,6 +159,7 @@ async def create(tenant_id: str = None):
 @manager.route("/datasets", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def delete(tenant_id):
     """
     Delete datasets.
@@ -217,6 +219,7 @@ async def delete(tenant_id):
 @manager.route("/datasets/<dataset_id>", methods=["PUT"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update(tenant_id, dataset_id):
     """
     Update a dataset.
@@ -432,6 +435,7 @@ def list_tags(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/tags", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def delete_tags(tenant_id, dataset_id):
     req = await request.get_json()
     if not req or "tags" not in req:
@@ -455,6 +459,7 @@ async def delete_tags(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/tags", methods=["PUT"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def rename_tag(tenant_id, dataset_id):
     req = await request.get_json()
     if not req or "from_tag" not in req or "to_tag" not in req:
@@ -562,6 +567,7 @@ async def get_knowledge_graph(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/index", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def run_index(tenant_id, dataset_id):
     index_type = request.args.get("type", "")
     index_type = index_type.lower()
@@ -601,6 +607,7 @@ def trace_index(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/index", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 def delete_index(tenant_id, dataset_id, index_type=None):
     index_type = (index_type or request.args.get("type", "")).lower()
     if index_type not in dataset_api_service._VALID_INDEX_TYPES:
@@ -627,6 +634,7 @@ def delete_index(tenant_id, dataset_id, index_type=None):
 @manager.route("/datasets/<dataset_id>/embedding", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def run_embedding(tenant_id, dataset_id):
     try:
         success, result = dataset_api_service.run_embedding(dataset_id, tenant_id)
@@ -642,6 +650,7 @@ async def run_embedding(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/embedding/check", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def check_embedding(tenant_id, dataset_id):
     try:
         req = await request.get_json()
@@ -746,6 +755,7 @@ def get_auto_metadata(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/metadata/config", methods=["PUT"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update_auto_metadata(tenant_id, dataset_id):
     """
     Update auto-metadata configuration for a dataset.

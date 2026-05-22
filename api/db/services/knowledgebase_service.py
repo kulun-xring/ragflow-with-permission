@@ -502,8 +502,9 @@ class KnowledgebaseService(CommonService):
         if kb.permission != TenantPermission.TEAM.value:
             return False
 
-        joined_tenants = TenantService.get_joined_tenants_by_user_id(user_id)
-        return any(tenant["tenant_id"] == kb.tenant_id for tenant in joined_tenants)
+        from api.common.check_team_permission import get_user_team_role
+        role = get_user_team_role(user_id, kb.tenant_id)
+        return role in ('superadmin', 'teamadmin', 'member')
 
     @classmethod
     @DB.connection_context()

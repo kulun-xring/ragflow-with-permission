@@ -721,6 +721,7 @@ class User(DataBaseModel, AuthUser):
     login_channel = CharField(null=True, help_text="from which user login", index=True)
     status = CharField(max_length=1, null=True, help_text="is it validate(0: wasted, 1: validate)", default="1", index=True)
     is_superuser = BooleanField(null=True, help_text="is root", default=False, index=True)
+    is_superadmin = BooleanField(null=False, help_text="is super admin", default=False, index=True)
 
     def __str__(self):
         return self.email
@@ -1654,6 +1655,7 @@ def migrate_db():
     alter_db_add_column(migrator, "api_4_conversation", "version_title", CharField(max_length=255, null=True, help_text="canvas version title when session created", index=False))
     alter_db_column_type(migrator, "document", "size", BigIntegerField(default=0, index=True))
     alter_db_column_type(migrator, "file", "size", BigIntegerField(default=0, index=True))
+    alter_db_add_column(migrator, "user", "is_superadmin", BooleanField(null=False, help_text="is super admin", default=False, index=True))
     logging.disable(logging.NOTSET)
     # this is after re-enabling logging to allow logging changed user emails
     migrate_add_unique_email(migrator)

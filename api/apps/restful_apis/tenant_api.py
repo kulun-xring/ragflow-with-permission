@@ -16,7 +16,7 @@
 import asyncio
 import logging
 
-from api.apps import current_user, login_required
+from api.apps import current_user, login_required, superadmin_or_teamadmin_required
 from api.db import UserTenantRole
 from api.db.db_models import UserTenant
 from api.db.services.user_service import UserService, UserTenantService
@@ -55,6 +55,7 @@ def user_list(tenant_id):
 
 @manager.route("/tenants/<tenant_id>/users", methods=["POST"])  # noqa: F821
 @login_required
+@superadmin_or_teamadmin_required
 @validate_request("email")
 async def create(tenant_id):
     if current_user.id != tenant_id:
@@ -124,7 +125,24 @@ async def create(tenant_id):
 async def rm(tenant_id):
     req = await get_request_json()
     user_id = req["user_id"]
-    if current_user.id != tenant_id and current_user.id != user_id:
+
+    # Case 1: user is removing themselves (leave team)
+    if current_user.id == user_id:
+        # SuperAdmin cannot leave any team — they are the sole user maintainer
+        if getattr(current_user, "is_superadmin", False):
+            return get_json_result(
+                data=False,
+                message="SuperAdmin cannot leave any team.",
+                code=RetCode.FORBIDDEN,
+            )
+        try:
+            UserTenantService.filter_delete([UserTenant.tenant_id == tenant_id, UserTenant.user_id == user_id])
+            return get_json_result(data=True)
+        except Exception as exc:
+            return server_error_response(exc)
+
+    # Case 2: removing someone else — must be teamadmin or superadmin
+    if current_user.id != tenant_id:
         return get_json_result(
             data=False,
             message="No authorization.",

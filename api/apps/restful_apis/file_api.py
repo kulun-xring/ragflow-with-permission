@@ -17,7 +17,7 @@ import logging
 import re
 
 from quart import request, make_response
-from api.apps import login_required
+from api.apps import login_required, superadmin_or_teamadmin_required
 from api.db import FileType
 from api.db.services.file2document_service import File2DocumentService
 from api.utils.api_utils import (
@@ -45,6 +45,7 @@ from api.apps.services import file_api_service
 @manager.route("/files", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def create_or_upload(tenant_id: str = None):
     """
     Upload files or create a folder.
@@ -156,6 +157,7 @@ async def list_files(tenant_id: str = None):
 @manager.route("/files", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def delete(tenant_id: str = None):
     """
     Delete files.
@@ -213,6 +215,7 @@ async def delete(tenant_id: str = None):
 @manager.route("/files/move", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def move(tenant_id: str = None):
     """
     Move and/or rename files. Follows Linux mv semantics:

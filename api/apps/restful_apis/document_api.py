@@ -23,7 +23,7 @@ from quart import request, make_response
 from peewee import OperationalError
 from pydantic import ValidationError
 
-from api.apps import current_user, login_required
+from api.apps import current_user, login_required, superadmin_or_teamadmin_required
 from api.constants import FILE_NAME_LEN_LIMIT, IMG_BASE64_PREFIX
 from api.apps.services.document_api_service import validate_document_update_fields, map_doc_keys, \
     map_doc_keys_with_run_status, update_document_name_only, update_chunk_method, update_document_status_only, \
@@ -57,6 +57,7 @@ from rag.nlp import search
 @manager.route("/documents/upload", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def upload_info(tenant_id: str):
     """
     Upload a document and get its parsed info.
@@ -120,6 +121,7 @@ async def upload_info(tenant_id: str):
 @manager.route("/datasets/<dataset_id>/documents/<document_id>", methods=["PATCH"]) # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update_document(tenant_id, dataset_id, document_id):
     """
     Update a document within a dataset.
@@ -283,6 +285,7 @@ async def metadata_summary(dataset_id, tenant_id):
 @manager.route("/datasets/<dataset_id>/metadata/update", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def metadata_batch_update(dataset_id, tenant_id):
     """
     Batch update metadata for documents in a dataset.
@@ -365,6 +368,7 @@ async def metadata_batch_update(dataset_id, tenant_id):
 @manager.route("/datasets/<dataset_id>/documents", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def upload_document(dataset_id, tenant_id):
     """
     Upload documents to a dataset.
@@ -1001,6 +1005,7 @@ def _parse_doc_id_filter_with_metadata(req, kb_id):
 @manager.route("/datasets/<dataset_id>/documents", methods=["DELETE"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def delete_documents(tenant_id, dataset_id):
     """
     Delete documents from a dataset.
@@ -1092,6 +1097,7 @@ async def delete_documents(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/documents/<document_id>/metadata/config", methods=["PUT"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update_metadata_config(tenant_id, dataset_id, document_id):
     """
     Update document metadata configuration.
@@ -1205,6 +1211,7 @@ def list_thumbnails():
 @manager.route("/datasets/<dataset_id>/documents/metadatas", methods=["PATCH"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def update_metadata(tenant_id, dataset_id):
     """
     Update document metadata in batch.
@@ -1333,6 +1340,7 @@ async def update_metadata(tenant_id, dataset_id):
 @manager.route("/documents/ingest", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def ingest(tenant_id):
     req = await get_request_json()
     try:
@@ -1404,6 +1412,7 @@ def _run_sync(user_id:str, req):
 @manager.route("/datasets/<dataset_id>/documents/parse", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def parse_documents(tenant_id, dataset_id):
     """
     Start parsing documents in a dataset.
@@ -1516,6 +1525,7 @@ async def parse_documents(tenant_id, dataset_id):
 @manager.route("/datasets/<dataset_id>/documents/stop", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def stop_parse_documents(tenant_id, dataset_id):
     """
     Stop parsing documents in a dataset.
@@ -1716,6 +1726,7 @@ async def get_artifact(filename):
 @manager.route("/datasets/<dataset_id>/documents/batch-update-status", methods=["POST"])  # noqa: F821
 @login_required
 @add_tenant_id_to_kwargs
+@superadmin_or_teamadmin_required
 async def batch_update_document_status(tenant_id, dataset_id):
     """
     Batch update status of documents within a dataset.
