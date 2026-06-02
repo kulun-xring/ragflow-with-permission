@@ -1,0 +1,5 @@
+member_1@abc.com,team_a,teamadmin
+member_2@abc.com,team_a,teammember
+member_3@abc.com,team_a,teammember
+member_1@abc.com,team_b,teammember
+member_3@abc.com,team_b,teamadmin
