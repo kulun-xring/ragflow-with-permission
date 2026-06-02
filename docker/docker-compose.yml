@@ -44,11 +44,11 @@ services:
       # - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./service_conf.yaml.template:/ragflow/conf/service_conf.yaml.template
       - ./entrypoint.sh:/ragflow/entrypoint.sh
-      - /root/ragflow/api:/ragflow/api
-      - /root/ragflow/common:/ragflow/common
-      - /root/ragflow/graphrag:/ragflow/graphrag
-      - /root/ragflow/rag:/ragflow/rag
-      - /root/ragflow/tools:/ragflow/tools
+      - ../api:/ragflow/api
+      - ../common:/ragflow/common
+      - ../graphrag:/ragflow/graphrag
+      - ../rag:/ragflow/rag
+      - ../tools:/ragflow/tools
     env_file: .env
     networks:
       - ragflow

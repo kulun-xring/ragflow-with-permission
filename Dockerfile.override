@@ -1,0 +1,39 @@
+# Dockerfile.override
+# Lightweight build: start from official RAGFlow image and overwrite modified source files.
+# This avoids the expensive full build (Python deps, npm, models, etc.).
+#
+# Usage:
+#   docker build -t <your-dockerhub-user>/ragflow-with-permission:latest -f Dockerfile.override .
+#   docker push <your-dockerhub-user>/ragflow-with-permission:latest
+
+FROM infiniflow/ragflow:v0.25.6 AS ragflow-base
+
+# ---- builder: rebuild the frontend with our patches ----
+FROM node:20-bookworm-slim AS frontend-builder
+WORKDIR /web
+
+# Copy the full web directory (including our patched tenant-table.tsx)
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
+
+COPY web/ .
+RUN NODE_OPTIONS="--max-old-space-size=8192" VITE_BUILD_SOURCEMAP=false VITE_MINIFY=esbuild npm run build
+
+# ---- final image ----
+FROM ragflow-base
+
+WORKDIR /ragflow
+
+# Overwrite modified python source files
+COPY api/ ./api/
+COPY common/ ./common/
+COPY rag/ ./rag/
+COPY agent/ ./agent/
+
+# Overwrite frontend (pre-built)
+COPY --from=frontend-builder /web/dist/ ./web/dist/
+
+# Ensure permissions
+RUN chmod +x ./entrypoint.sh 2>/dev/null || true
+
+ENTRYPOINT ["./entrypoint.sh"]
