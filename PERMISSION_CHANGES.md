@@ -161,3 +161,49 @@ All 26 test cases pass:
 - Superadmin: login, list teams, create/delete teams, register users, invite members, appoint/revoke teamadmin
 - Teamadmin: view team, create/list datasets, chats, agents
 - Teammember: list datasets/chats (read OK), create/delete (blocked with 108), appoint/invite (blocked)
+
+## Docker Image Build
+
+A local Docker image containing all permission modifications can be built using the provided `Dockerfile.local`. This is a lightweight build that starts from the official `infiniflow/ragflow:v0.25.6` image and overwrites only the modified source files — no need to rebuild Python dependencies or download ML models.
+
+### Prerequisites
+
+- Docker installed and running
+- Frontend built locally (done once):
+
+```bash
+cd web
+npm install
+NODE_OPTIONS="--max-old-space-size=8192" VITE_BUILD_SOURCEMAP=false VITE_MINIFY=esbuild npm run build
+```
+
+### Build the Image
+
+```bash
+cd /root/ragflow-with-permission
+docker build -t ragflow-with-permission:latest -f Dockerfile.local .
+```
+
+### Verify the Image
+
+```bash
+docker run --rm --entrypoint ls ragflow-with-permission:latest /ragflow/api/utils/permission.py
+docker run --rm --entrypoint ls ragflow-with-permission:latest /ragflow/web/dist/index.html
+```
+
+### Local Usage
+
+Replace the official image in your local docker-compose:
+
+```bash
+docker tag ragflow-with-permission:latest infiniflow/ragflow:v0.25.6
+cd docker
+docker compose up -d
+```
+
+### Publish to Docker Hub (Optional)
+
+```bash
+docker tag ragflow-with-permission:latest <your-dockerhub-user>/ragflow-with-permission:latest
+docker push <your-dockerhub-user>/ragflow-with-permission:latest
+```

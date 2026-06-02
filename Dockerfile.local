@@ -1,0 +1,23 @@
+# Dockerfile.local
+# Build from official RAGFlow image, overwrite modified source files + pre-built frontend
+#
+# Usage:
+#   docker build -t ragflow-with-permission:latest -f Dockerfile.local .
+
+FROM infiniflow/ragflow:v0.25.6
+
+WORKDIR /ragflow
+
+# Overwrite modified Python source files
+COPY api/ ./api/
+COPY common/ ./common/
+COPY rag/ ./rag/
+COPY agent/ ./agent/
+
+# Overwrite pre-built frontend (run `npm run build` in web/ first)
+COPY web/dist/ ./web/dist/
+
+# Overwrite docker config (already mounted in docker-compose, but included for completeness)
+COPY docker/docker-compose.yml ./docker/docker-compose.yml
+
+ENTRYPOINT ["./entrypoint.sh"]
